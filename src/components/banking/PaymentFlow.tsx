@@ -9,9 +9,12 @@ import {
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { usePayment } from "@/hooks/usePayment";
 import { formatCurrency } from "@/lib/format";
 import { isStripeConfigured, stripePromise } from "@/lib/stripe";
+import { cn } from "@/lib/utils";
+import { isPositiveAmount } from "@/lib/validation";
 
 interface PaymentFlowProps {
   accountNumber: string;
@@ -58,7 +61,7 @@ function CheckoutForm({ accountNumber, amount, description, payment }: CheckoutF
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-1 flex-col gap-4">
+    <form onSubmit={handleSubmit} className="flex flex-1 flex-col gap-4" noValidate>
       <PaymentElement />
 
       {submitError && <p className="text-sm text-danger">{submitError}</p>}
@@ -88,6 +91,7 @@ export function PaymentFlow({ accountNumber, onClose, onCompleted }: PaymentFlow
   const [amount, setAmount] = useState("");
   const [description, setDescription] = useState("");
   const [confirmedAmount, setConfirmedAmount] = useState<number | null>(null);
+  const [amountError, setAmountError] = useState<string | null>(null);
 
   const isProcessingTimeout = stage === "error" && !!order;
   const isTerminal =
@@ -96,9 +100,12 @@ export function PaymentFlow({ accountNumber, onClose, onCompleted }: PaymentFlow
 
   function handleAmountSubmit(e: React.FormEvent) {
     e.preventDefault();
-    const parsed = Number(amount);
-    if (!parsed || parsed <= 0) return;
-    setConfirmedAmount(parsed);
+    if (!isPositiveAmount(amount)) {
+      setAmountError("Enter an amount greater than 0.");
+      return;
+    }
+    setAmountError(null);
+    setConfirmedAmount(Number(amount));
   }
 
   const showHeader = !isTerminal;
@@ -120,36 +127,41 @@ export function PaymentFlow({ accountNumber, onClose, onCompleted }: PaymentFlow
       )}
 
       {showAmountForm && (
-        <form onSubmit={handleAmountSubmit} className="flex flex-1 flex-col gap-4">
+        <form onSubmit={handleAmountSubmit} className="flex flex-1 flex-col gap-4" noValidate>
           <div>
             <label className="mb-1.5 block text-xs font-medium text-muted-foreground">
               Amount
             </label>
-            <div className="flex items-center rounded-2xl border border-border bg-card px-4">
+            <div
+              className={cn(
+                "flex items-center rounded-2xl border border-border bg-card px-4",
+                amountError && "border-danger"
+              )}
+            >
               <span className="text-2xl font-semibold text-muted-foreground">$</span>
-              <input
+              <Input
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
                 placeholder="0.00"
                 type="number"
                 min="0.01"
                 step="0.01"
-                className="h-14 w-full bg-transparent px-2 text-2xl font-semibold outline-none"
                 required
                 autoFocus
+                className="h-14 rounded-none border-0 bg-transparent px-2 text-2xl font-semibold focus:border-0"
               />
             </div>
+            {amountError && <p className="mt-1 text-xs text-danger">{amountError}</p>}
           </div>
 
           <div>
             <label className="mb-1.5 block text-xs font-medium text-muted-foreground">
               Description (optional)
             </label>
-            <input
+            <Input
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Description"
-              className="h-12 w-full rounded-2xl border border-border bg-card px-4 text-sm outline-none focus:border-accent"
             />
           </div>
 

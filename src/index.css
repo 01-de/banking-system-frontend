@@ -58,8 +58,10 @@
   --warning: #ffc247;
 }
 
-* {
-  border-color: var(--border);
+@layer base {
+  * {
+    border-color: var(--border);
+  }
 }
 
 body {

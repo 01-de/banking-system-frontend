@@ -10,6 +10,13 @@ import { createAccount, getMyAccounts } from "@/api/accounts";
 import { ApiError } from "@/api/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { accountTypeLabel, formatCurrency } from "@/lib/format";
+import {
+  isNonEmpty,
+  isPositiveAmount,
+  isValidAccountNumber,
+  isValidEmail,
+  isValidPhone,
+} from "@/lib/validation";
 import type { AccountResponse, AccountType } from "@/types/banking";
 
 interface AccountPickerProps {
@@ -42,15 +49,45 @@ function CreateAccountForm({
   const [initialDeposit, setInitialDeposit] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [nameError, setNameError] = useState<string | null>(null);
+  const [emailError, setEmailError] = useState<string | null>(null);
+  const [phoneError, setPhoneError] = useState<string | null>(null);
+  const [depositError, setDepositError] = useState<string | null>(null);
+
+  function validate(): boolean {
+    let valid = true;
+    if (!isNonEmpty(accountHolderName)) {
+      setNameError("Enter the account holder's name.");
+      valid = false;
+    } else {
+      setNameError(null);
+    }
+    if (!isValidEmail(email)) {
+      setEmailError("Enter a valid email address.");
+      valid = false;
+    } else {
+      setEmailError(null);
+    }
+    if (!isValidPhone(phone)) {
+      setPhoneError("Enter a valid phone number, including country code.");
+      valid = false;
+    } else {
+      setPhoneError(null);
+    }
+    if (!isPositiveAmount(initialDeposit)) {
+      setDepositError("Initial deposit must be a positive amount.");
+      valid = false;
+    } else {
+      setDepositError(null);
+    }
+    return valid;
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
+    if (!validate()) return;
     const parsedDeposit = Number(initialDeposit);
-    if (!parsedDeposit || parsedDeposit <= 0) {
-      setError("Initial deposit must be a positive amount.");
-      return;
-    }
     setIsSubmitting(true);
     try {
       const account = await createAccount({
@@ -69,30 +106,42 @@ function CreateAccountForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-      <Input
-        value={accountHolderName}
-        onChange={(e) => setAccountHolderName(e.target.value)}
-        placeholder="Account holder name"
-        disabled={isSubmitting}
-        required
-      />
-      <Input
-        type="email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        placeholder="Email"
-        disabled={isSubmitting}
-        required
-      />
-      <Input
-        type="tel"
-        value={phone}
-        onChange={(e) => setPhone(e.target.value)}
-        placeholder="Phone"
-        disabled={isSubmitting}
-        required
-      />
+    <form onSubmit={handleSubmit} className="flex flex-col gap-3" noValidate>
+      <div>
+        <Input
+          value={accountHolderName}
+          onChange={(e) => setAccountHolderName(e.target.value)}
+          placeholder="Account holder name"
+          disabled={isSubmitting}
+          required
+          error={!!nameError}
+        />
+        {nameError && <p className="mt-1 text-xs text-danger">{nameError}</p>}
+      </div>
+      <div>
+        <Input
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder="Email"
+          disabled={isSubmitting}
+          required
+          error={!!emailError}
+        />
+        {emailError && <p className="mt-1 text-xs text-danger">{emailError}</p>}
+      </div>
+      <div>
+        <Input
+          type="tel"
+          value={phone}
+          onChange={(e) => setPhone(e.target.value)}
+          placeholder="Phone (e.g. +1 555 123 4567)"
+          disabled={isSubmitting}
+          required
+          error={!!phoneError}
+        />
+        {phoneError && <p className="mt-1 text-xs text-danger">{phoneError}</p>}
+      </div>
       <select
         value={accountType}
         onChange={(e) => setAccountType(e.target.value as AccountType)}
@@ -103,16 +152,20 @@ function CreateAccountForm({
         <option value="CURRENT">Current</option>
         <option value="FIXED_DEPOSIT">Fixed Deposit</option>
       </select>
-      <Input
-        type="number"
-        min="0.01"
-        step="0.01"
-        value={initialDeposit}
-        onChange={(e) => setInitialDeposit(e.target.value)}
-        placeholder="Initial deposit"
-        disabled={isSubmitting}
-        required
-      />
+      <div>
+        <Input
+          type="number"
+          min="0.01"
+          step="0.01"
+          value={initialDeposit}
+          onChange={(e) => setInitialDeposit(e.target.value)}
+          placeholder="Initial deposit"
+          disabled={isSubmitting}
+          required
+          error={!!depositError}
+        />
+        {depositError && <p className="mt-1 text-xs text-danger">{depositError}</p>}
+      </div>
 
       {error && <p className="text-sm text-danger">{error}</p>}
 
@@ -125,19 +178,34 @@ function CreateAccountForm({
 
 function AdminLookup({ onSelect }: { onSelect: (accountNumber: string) => void }) {
   const [draft, setDraft] = useState("");
+  const [draftError, setDraftError] = useState<string | null>(null);
+
+  function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!isNonEmpty(draft)) {
+      setDraftError("Enter an account number.");
+      return;
+    }
+    if (!isValidAccountNumber(draft)) {
+      setDraftError("Account number should be 6–20 digits.");
+      return;
+    }
+    setDraftError(null);
+    onSelect(draft.trim());
+  }
+
   return (
-    <form
-      className="flex flex-col gap-3"
-      onSubmit={(e) => {
-        e.preventDefault();
-        if (draft.trim()) onSelect(draft.trim());
-      }}
-    >
-      <Input
-        value={draft}
-        onChange={(e) => setDraft(e.target.value)}
-        placeholder="Account number"
-      />
+    <form className="flex flex-col gap-3" onSubmit={handleSubmit} noValidate>
+      <div>
+        <Input
+          value={draft}
+          onChange={(e) => setDraft(e.target.value)}
+          placeholder="Account number"
+          required
+          error={!!draftError}
+        />
+        {draftError && <p className="mt-1 text-xs text-danger">{draftError}</p>}
+      </div>
       <Button type="submit" variant="outline">
         Look up account
       </Button>

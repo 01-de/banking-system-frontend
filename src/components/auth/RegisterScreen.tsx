@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/contexts/AuthContext";
 import { ApiError } from "@/api/client";
+import { isValidEmail, isValidPhone } from "@/lib/validation";
 
 interface RegisterScreenProps {
   onSwitchToLogin: () => void;
@@ -18,19 +19,44 @@ export function RegisterScreen({ onSwitchToLogin, onRegistered }: RegisterScreen
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [emailError, setEmailError] = useState<string | null>(null);
+  const [phoneError, setPhoneError] = useState<string | null>(null);
+  const [passwordError, setPasswordError] = useState<string | null>(null);
+  const [confirmPasswordError, setConfirmPasswordError] = useState<string | null>(null);
+
+  function validate(): boolean {
+    let valid = true;
+    if (!isValidEmail(email)) {
+      setEmailError("Enter a valid email address.");
+      valid = false;
+    } else {
+      setEmailError(null);
+    }
+    if (!isValidPhone(phone)) {
+      setPhoneError("Enter a valid phone number, including country code (e.g. +1 555 123 4567).");
+      valid = false;
+    } else {
+      setPhoneError(null);
+    }
+    if (password.length < 8) {
+      setPasswordError("Password must be at least 8 characters.");
+      valid = false;
+    } else {
+      setPasswordError(null);
+    }
+    if (password !== confirmPassword) {
+      setConfirmPasswordError("Passwords don't match.");
+      valid = false;
+    } else {
+      setConfirmPasswordError(null);
+    }
+    return valid;
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
-
-    if (password.length < 8) {
-      setError("Password must be at least 8 characters.");
-      return;
-    }
-    if (password !== confirmPassword) {
-      setError("Passwords don't match.");
-      return;
-    }
+    if (!validate()) return;
 
     setIsSubmitting(true);
     try {
@@ -52,44 +78,62 @@ export function RegisterScreen({ onSwitchToLogin, onRegistered }: RegisterScreen
         <p className="mt-1 text-sm text-muted-foreground">Takes less than a minute.</p>
       </div>
 
-      <form className="flex flex-col gap-3" onSubmit={handleSubmit}>
-        <Input
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          placeholder="Email"
-          autoComplete="email"
-          disabled={isSubmitting}
-          autoFocus
-          required
-        />
-        <Input
-          type="tel"
-          value={phone}
-          onChange={(e) => setPhone(e.target.value)}
-          placeholder="Phone"
-          autoComplete="tel"
-          disabled={isSubmitting}
-          required
-        />
-        <Input
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          placeholder="Password (min 8 characters)"
-          autoComplete="new-password"
-          disabled={isSubmitting}
-          required
-        />
-        <Input
-          type="password"
-          value={confirmPassword}
-          onChange={(e) => setConfirmPassword(e.target.value)}
-          placeholder="Confirm password"
-          autoComplete="new-password"
-          disabled={isSubmitting}
-          required
-        />
+      <form className="flex flex-col gap-3" onSubmit={handleSubmit} noValidate>
+        <div>
+          <Input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="Email"
+            autoComplete="email"
+            disabled={isSubmitting}
+            autoFocus
+            required
+            error={!!emailError}
+          />
+          {emailError && <p className="mt-1 text-xs text-danger">{emailError}</p>}
+        </div>
+        <div>
+          <Input
+            type="tel"
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+            placeholder="Phone (e.g. +1 555 123 4567)"
+            autoComplete="tel"
+            disabled={isSubmitting}
+            required
+            error={!!phoneError}
+          />
+          {phoneError && <p className="mt-1 text-xs text-danger">{phoneError}</p>}
+        </div>
+        <div>
+          <Input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="Password (min 8 characters)"
+            autoComplete="new-password"
+            disabled={isSubmitting}
+            required
+            error={!!passwordError}
+          />
+          {passwordError && <p className="mt-1 text-xs text-danger">{passwordError}</p>}
+        </div>
+        <div>
+          <Input
+            type="password"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            placeholder="Confirm password"
+            autoComplete="new-password"
+            disabled={isSubmitting}
+            required
+            error={!!confirmPasswordError}
+          />
+          {confirmPasswordError && (
+            <p className="mt-1 text-xs text-danger">{confirmPasswordError}</p>
+          )}
+        </div>
 
         {error && <p className="text-sm text-danger">{error}</p>}
 

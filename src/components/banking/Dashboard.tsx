@@ -1,4 +1,5 @@
 import { Bell, LogOut } from "lucide-react";
+import { useState } from "react";
 
 import { Avatar } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,6 +9,7 @@ import { useAccount } from "@/hooks/useAccount";
 import { useTransactionHistory } from "@/hooks/useTransactionHistory";
 
 import { BalanceCard } from "./BalanceCard";
+import { NotificationsPanel } from "./NotificationsPanel";
 import { QuickActions } from "./QuickActions";
 import { TransactionsList } from "./TransactionsList";
 
@@ -15,9 +17,10 @@ interface DashboardProps {
   accountNumber: string;
   onTransfer?: () => void;
   onTopUp?: () => void;
+  onSwitchAccount?: () => void;
 }
 
-export function Dashboard({ accountNumber, onTransfer, onTopUp }: DashboardProps) {
+export function Dashboard({ accountNumber, onTransfer, onTopUp, onSwitchAccount }: DashboardProps) {
   const { role, logout } = useAuth();
   const {
     account,
@@ -31,10 +34,11 @@ export function Dashboard({ accountNumber, onTransfer, onTopUp }: DashboardProps
     isUnblocking,
   } = useAccount(accountNumber);
   const history = useTransactionHistory(accountNumber);
+  const [showNotifications, setShowNotifications] = useState(false);
 
   return (
     <div className="mx-auto flex min-h-svh w-full max-w-md flex-col gap-6 px-4 pb-16 pt-6">
-      <header className="flex items-center justify-between">
+      <header className="relative flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Avatar name={account?.accountHolderName ?? accountNumber} />
           <div>
@@ -47,6 +51,7 @@ export function Dashboard({ accountNumber, onTransfer, onTopUp }: DashboardProps
         <div className="flex items-center gap-2">
           <button
             type="button"
+            onClick={() => setShowNotifications((v) => !v)}
             className="flex h-10 w-10 items-center justify-center rounded-full bg-muted text-muted-foreground hover:text-foreground"
             aria-label="Notifications"
           >
@@ -61,6 +66,17 @@ export function Dashboard({ accountNumber, onTransfer, onTopUp }: DashboardProps
             <LogOut size={18} />
           </button>
         </div>
+
+        {showNotifications && (
+          <NotificationsPanel
+            accountNumber={accountNumber}
+            transactions={history.transactions}
+            isLoading={history.isLoading}
+            isForbidden={history.isForbidden}
+            error={history.error}
+            onClose={() => setShowNotifications(false)}
+          />
+        )}
       </header>
 
       {isLoading && (
@@ -100,7 +116,12 @@ export function Dashboard({ accountNumber, onTransfer, onTopUp }: DashboardProps
         />
       )}
 
-      <QuickActions role={role} onTransfer={onTransfer} onTopUp={onTopUp} />
+      <QuickActions
+        role={role}
+        onTransfer={onTransfer}
+        onTopUp={onTopUp}
+        onMore={onSwitchAccount}
+      />
 
       <Card>
         <CardHeader>

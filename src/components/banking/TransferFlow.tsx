@@ -2,8 +2,11 @@ import { ArrowLeft, CheckCircle2, XCircle } from "lucide-react";
 import { useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { useTransfer } from "@/hooks/useTransfer";
 import { formatCurrency } from "@/lib/format";
+import { cn } from "@/lib/utils";
+import { isPositiveAmount, isValidAccountNumber } from "@/lib/validation";
 
 interface TransferFlowProps {
   senderAccountNumber: string;
@@ -21,13 +24,32 @@ export function TransferFlow({ senderAccountNumber, onClose, onCompleted }: Tran
   const [description, setDescription] = useState("");
   const [otp, setOtp] = useState<string[]>(Array(OTP_LENGTH).fill(""));
   const otpRefs = useRef<(HTMLInputElement | null)[]>([]);
+  const [receiverError, setReceiverError] = useState<string | null>(null);
+  const [amountError, setAmountError] = useState<string | null>(null);
 
   const isBusy = stage === "submitting" || stage === "polling_status" || stage === "verifying_otp";
 
+  function validate(): boolean {
+    let valid = true;
+    if (!isValidAccountNumber(receiverAccountNumber)) {
+      setReceiverError("Enter a valid account number (6–20 digits).");
+      valid = false;
+    } else {
+      setReceiverError(null);
+    }
+    if (!isPositiveAmount(amount)) {
+      setAmountError("Enter an amount greater than 0.");
+      valid = false;
+    } else {
+      setAmountError(null);
+    }
+    return valid;
+  }
+
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (!validate()) return;
     const parsedAmount = Number(amount);
-    if (!receiverAccountNumber.trim() || !parsedAmount || parsedAmount <= 0) return;
     void submitTransfer({
       senderAccountNumber,
       receiverAccountNumber: receiverAccountNumber.trim(),
@@ -82,26 +104,32 @@ export function TransferFlow({ senderAccountNumber, onClose, onCompleted }: Tran
         stage === "polling_status" ||
         stage === "rate_limited" ||
         stage === "error") && (
-        <form onSubmit={handleSubmit} className="flex flex-1 flex-col gap-4">
+        <form onSubmit={handleSubmit} className="flex flex-1 flex-col gap-4" noValidate>
           <div>
             <label className="mb-1.5 block text-xs font-medium text-muted-foreground">
               Recipient account number
             </label>
-            <input
+            <Input
               value={receiverAccountNumber}
               onChange={(e) => setReceiverAccountNumber(e.target.value)}
               placeholder="e.g. 495147077468"
               disabled={isBusy}
-              className="h-12 w-full rounded-2xl border border-border bg-card px-4 text-sm outline-none focus:border-accent disabled:opacity-50"
               required
+              error={!!receiverError}
             />
+            {receiverError && <p className="mt-1 text-xs text-danger">{receiverError}</p>}
           </div>
 
           <div>
             <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Amount</label>
-            <div className="flex items-center rounded-2xl border border-border bg-card px-4">
+            <div
+              className={cn(
+                "flex items-center rounded-2xl border border-border bg-card px-4",
+                amountError && "border-danger"
+              )}
+            >
               <span className="text-2xl font-semibold text-muted-foreground">$</span>
-              <input
+              <Input
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
                 placeholder="0.00"
@@ -109,22 +137,22 @@ export function TransferFlow({ senderAccountNumber, onClose, onCompleted }: Tran
                 min="0.01"
                 step="0.01"
                 disabled={isBusy}
-                className="h-14 w-full bg-transparent px-2 text-2xl font-semibold outline-none disabled:opacity-50"
                 required
+                className="h-14 rounded-none border-0 bg-transparent px-2 text-2xl font-semibold focus:border-0"
               />
             </div>
+            {amountError && <p className="mt-1 text-xs text-danger">{amountError}</p>}
           </div>
 
           <div>
             <label className="mb-1.5 block text-xs font-medium text-muted-foreground">
               What's it for? (optional)
             </label>
-            <input
+            <Input
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Description"
               disabled={isBusy}
-              className="h-12 w-full rounded-2xl border border-border bg-card px-4 text-sm outline-none focus:border-accent disabled:opacity-50"
             />
           </div>
 

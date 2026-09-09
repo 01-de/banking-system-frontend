@@ -54,6 +54,7 @@ function App() {
       accountNumber={accountNumber}
       onTransfer={() => setScreen("transfer")}
       onTopUp={() => setScreen("payment")}
+      onSwitchAccount={() => setAccountNumber(null)}
     />
   );
 }

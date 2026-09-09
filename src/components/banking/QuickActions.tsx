@@ -1,4 +1,4 @@
-import { ArrowDownToLine, ArrowUpRight, MoreHorizontal } from "lucide-react";
+import { ArrowDownToLine, ArrowUpRight, Repeat } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
 import type { Role } from "@/types/auth";
@@ -22,7 +22,7 @@ export function QuickActions({ role, onTransfer, onTopUp, onMore }: QuickActions
   const actions: QuickAction[] = [
     ...(isCustomer ? [{ label: "Transfer", icon: ArrowUpRight, onClick: onTransfer }] : []),
     ...(isCustomer ? [{ label: "Top up", icon: ArrowDownToLine, onClick: onTopUp }] : []),
-    { label: "More", icon: MoreHorizontal, onClick: onMore },
+    { label: "Switch", icon: Repeat, onClick: onMore },
   ];
 
   const colsClass =
