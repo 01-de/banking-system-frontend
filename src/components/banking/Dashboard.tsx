@@ -1,4 +1,4 @@
-import { Bell } from "lucide-react";
+import { Bell, LogOut } from "lucide-react";
 
 import { Avatar } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -18,7 +18,7 @@ interface DashboardProps {
 }
 
 export function Dashboard({ accountNumber, onTransfer, onTopUp }: DashboardProps) {
-  const { role } = useAuth();
+  const { role, logout } = useAuth();
   const {
     account,
     isLoading,
@@ -44,13 +44,23 @@ export function Dashboard({ accountNumber, onTransfer, onTopUp }: DashboardProps
             </p>
           </div>
         </div>
-        <button
-          type="button"
-          className="flex h-10 w-10 items-center justify-center rounded-full bg-muted text-muted-foreground hover:text-foreground"
-          aria-label="Notifications"
-        >
-          <Bell size={18} />
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            className="flex h-10 w-10 items-center justify-center rounded-full bg-muted text-muted-foreground hover:text-foreground"
+            aria-label="Notifications"
+          >
+            <Bell size={18} />
+          </button>
+          <button
+            type="button"
+            onClick={() => void logout()}
+            className="flex h-10 w-10 items-center justify-center rounded-full bg-muted text-muted-foreground hover:text-foreground"
+            aria-label="Log out"
+          >
+            <LogOut size={18} />
+          </button>
+        </div>
       </header>
 
       {isLoading && (
