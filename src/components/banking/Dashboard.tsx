@@ -10,6 +10,7 @@ import { useTransactionHistory } from "@/hooks/useTransactionHistory";
 
 import { BalanceCard } from "./BalanceCard";
 import { NotificationsPanel } from "./NotificationsPanel";
+import { ProfilePanel } from "./ProfilePanel";
 import { QuickActions } from "./QuickActions";
 import { TransactionsList } from "./TransactionsList";
 
@@ -35,11 +36,17 @@ export function Dashboard({ accountNumber, onTransfer, onTopUp, onSwitchAccount 
   } = useAccount(accountNumber);
   const history = useTransactionHistory(accountNumber);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [showProfile, setShowProfile] = useState(false);
 
   return (
     <div className="mx-auto flex min-h-svh w-full max-w-md flex-col gap-6 px-4 pb-16 pt-6">
       <header className="relative flex items-center justify-between">
-        <div className="flex items-center gap-3">
+        <button
+          type="button"
+          onClick={() => account && setShowProfile((v) => !v)}
+          className="flex items-center gap-3 text-left"
+          disabled={!account}
+        >
           <Avatar name={account?.accountHolderName ?? accountNumber} />
           <div>
             <p className="text-xs text-muted-foreground">Welcome back</p>
@@ -47,7 +54,11 @@ export function Dashboard({ accountNumber, onTransfer, onTopUp, onSwitchAccount 
               {account?.accountHolderName ?? accountNumber}
             </p>
           </div>
-        </div>
+        </button>
+
+        {showProfile && account && (
+          <ProfilePanel account={account} onClose={() => setShowProfile(false)} />
+        )}
         <div className="flex items-center gap-2">
           <button
             type="button"
