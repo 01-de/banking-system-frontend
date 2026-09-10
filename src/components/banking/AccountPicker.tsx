@@ -236,7 +236,7 @@ export function AccountPicker({ onSelect }: AccountPickerProps) {
   const isLoading = accounts === null && !error;
 
   return (
-    <div className="mx-auto flex min-h-svh w-full max-w-md flex-col gap-6 px-4 py-6">
+    <div className="mx-auto flex min-h-svh w-full max-w-md flex-col gap-6 px-4 py-6 lg:max-w-3xl lg:px-8">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold">Your accounts</h1>
         <button
@@ -258,7 +258,7 @@ export function AccountPicker({ onSelect }: AccountPickerProps) {
       {error && <p className="text-sm text-danger">{error}</p>}
 
       {accounts && accounts.length > 0 && (
-        <div className="flex flex-col gap-3">
+        <div className="grid gap-3 lg:grid-cols-2">
           {accounts.map((account) => (
             <button
               key={account.accountNumber}

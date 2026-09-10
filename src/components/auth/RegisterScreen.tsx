@@ -72,7 +72,8 @@ export function RegisterScreen({ onSwitchToLogin, onRegistered }: RegisterScreen
   }
 
   return (
-    <div className="mx-auto flex min-h-svh w-full max-w-md flex-col justify-center gap-6 px-4">
+    <div className="mx-auto flex min-h-svh w-full max-w-md flex-col justify-center gap-6 px-4 md:max-w-2xl">
+      <div className="flex flex-col gap-6 md:rounded-card md:border md:border-border md:bg-card md:p-10 md:shadow-sm">
       <div>
         <h1 className="text-2xl font-semibold">Create an account</h1>
         <p className="mt-1 text-sm text-muted-foreground">Takes less than a minute.</p>
@@ -149,6 +150,7 @@ export function RegisterScreen({ onSwitchToLogin, onRegistered }: RegisterScreen
       >
         Already have an account? <span className="text-accent">Log in</span>
       </button>
+      </div>
     </div>
   );
 }

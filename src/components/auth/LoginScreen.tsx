@@ -61,65 +61,67 @@ export function LoginScreen({
   }
 
   return (
-    <div className="mx-auto flex min-h-svh w-full max-w-md flex-col justify-center gap-6 px-4">
-      <div>
-        <h1 className="text-2xl font-semibold">Log in</h1>
-        <p className="mt-1 text-sm text-muted-foreground">Welcome back.</p>
-      </div>
+    <div className="mx-auto flex min-h-svh w-full max-w-md flex-col justify-center gap-6 px-4 md:max-w-2xl">
+      <div className="flex flex-col gap-6 md:rounded-card md:border md:border-border md:bg-card md:p-10 md:shadow-sm">
+        <div>
+          <h1 className="text-2xl font-semibold">Log in</h1>
+          <p className="mt-1 text-sm text-muted-foreground">Welcome back.</p>
+        </div>
 
-      {banner && (
-        <p
-          className={`rounded-2xl border border-border bg-card px-4 py-3 text-sm ${
-            bannerTone === "warning" ? "text-warning" : "text-success"
-          }`}
+        {banner && (
+          <p
+            className={`rounded-2xl border border-border bg-card px-4 py-3 text-sm ${
+              bannerTone === "warning" ? "text-warning" : "text-success"
+            }`}
+          >
+            {banner}
+          </p>
+        )}
+
+        <form className="flex flex-col gap-3" onSubmit={handleSubmit} noValidate>
+          <div>
+            <Input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Email"
+              autoComplete="email"
+              disabled={isSubmitting}
+              autoFocus
+              required
+              error={!!emailError}
+            />
+            {emailError && <p className="mt-1 text-xs text-danger">{emailError}</p>}
+          </div>
+          <div>
+            <Input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Password"
+              autoComplete="current-password"
+              disabled={isSubmitting}
+              required
+              error={!!passwordError}
+            />
+            {passwordError && <p className="mt-1 text-xs text-danger">{passwordError}</p>}
+          </div>
+
+          {error && <p className="text-sm text-danger">{error}</p>}
+
+          <Button type="submit" size="lg" disabled={isSubmitting}>
+            {isSubmitting ? "Logging in…" : "Log in"}
+          </Button>
+        </form>
+
+        <button
+          type="button"
+          onClick={onSwitchToRegister}
+          className="text-sm text-muted-foreground hover:text-foreground"
         >
-          {banner}
-        </p>
-      )}
-
-      <form className="flex flex-col gap-3" onSubmit={handleSubmit} noValidate>
-        <div>
-          <Input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="Email"
-            autoComplete="email"
-            disabled={isSubmitting}
-            autoFocus
-            required
-            error={!!emailError}
-          />
-          {emailError && <p className="mt-1 text-xs text-danger">{emailError}</p>}
-        </div>
-        <div>
-          <Input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="Password"
-            autoComplete="current-password"
-            disabled={isSubmitting}
-            required
-            error={!!passwordError}
-          />
-          {passwordError && <p className="mt-1 text-xs text-danger">{passwordError}</p>}
-        </div>
-
-        {error && <p className="text-sm text-danger">{error}</p>}
-
-        <Button type="submit" size="lg" disabled={isSubmitting}>
-          {isSubmitting ? "Logging in…" : "Log in"}
-        </Button>
-      </form>
-
-      <button
-        type="button"
-        onClick={onSwitchToRegister}
-        className="text-sm text-muted-foreground hover:text-foreground"
-      >
-        Don't have an account? <span className="text-accent">Register</span>
-      </button>
+          Don't have an account? <span className="text-accent">Register</span>
+        </button>
+      </div>
     </div>
   );
 }

@@ -82,7 +82,7 @@ export function TransferFlow({ senderAccountNumber, onClose, onCompleted }: Tran
     stage !== "completed" && stage !== "flagged" && stage !== "failed" && stage !== "forbidden";
 
   return (
-    <div className="mx-auto flex min-h-svh w-full max-w-md flex-col px-4 pb-10 pt-6">
+    <div className="mx-auto flex min-h-svh w-full max-w-md flex-col px-4 pb-10 pt-6 md:min-h-0 md:max-w-lg md:my-10 md:rounded-card md:border md:border-border md:bg-card md:px-8 md:pb-8 md:shadow-xl">
       {showHeader && (
         <header className="mb-6 flex items-center gap-3">
           <button

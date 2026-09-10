@@ -39,7 +39,7 @@ export function Dashboard({ accountNumber, onTransfer, onTopUp, onSwitchAccount 
   const [showProfile, setShowProfile] = useState(false);
 
   return (
-    <div className="mx-auto flex min-h-svh w-full max-w-md flex-col gap-6 px-4 pb-16 pt-6">
+    <div className="mx-auto flex min-h-svh w-full max-w-md flex-col gap-6 px-4 pb-16 pt-6 lg:max-w-5xl lg:px-8 lg:pt-8">
       <header className="relative flex items-center justify-between">
         <button
           type="button"
@@ -90,64 +90,68 @@ export function Dashboard({ accountNumber, onTransfer, onTopUp, onSwitchAccount 
         )}
       </header>
 
-      {isLoading && (
-        <Skeleton className="h-44 w-full rounded-card" />
-      )}
+      <div className="flex flex-col gap-6 lg:grid lg:grid-cols-3 lg:items-start lg:gap-8">
+        <div className="flex flex-col gap-6 lg:col-span-2">
+          {isLoading && (
+            <Skeleton className="h-44 w-full rounded-card" />
+          )}
 
-      {!isLoading && isRateLimited && (
-        <Card>
-          <CardContent className="p-5 text-sm text-warning">
-            Too many requests — retrying shortly…
-          </CardContent>
-        </Card>
-      )}
+          {!isLoading && isRateLimited && (
+            <Card>
+              <CardContent className="p-5 text-sm text-warning">
+                Too many requests — retrying shortly…
+              </CardContent>
+            </Card>
+          )}
 
-      {!isLoading && isForbidden && (
-        <Card>
-          <CardContent className="p-5 text-sm text-muted-foreground">
-            You don't have access to this account.
-          </CardContent>
-        </Card>
-      )}
+          {!isLoading && isForbidden && (
+            <Card>
+              <CardContent className="p-5 text-sm text-muted-foreground">
+                You don't have access to this account.
+              </CardContent>
+            </Card>
+          )}
 
-      {!isLoading && error && (
-        <Card>
-          <CardContent className="p-5 text-sm text-danger">{error}</CardContent>
-        </Card>
-      )}
+          {!isLoading && error && (
+            <Card>
+              <CardContent className="p-5 text-sm text-danger">{error}</CardContent>
+            </Card>
+          )}
 
-      {!isLoading && account && (
-        <BalanceCard
-          account={account}
-          role={role}
-          onBlock={blockThisAccount}
-          isBlocking={isBlocking}
-          onUnblock={unblockThisAccount}
-          isUnblocking={isUnblocking}
-        />
-      )}
+          {!isLoading && account && (
+            <BalanceCard
+              account={account}
+              role={role}
+              onBlock={blockThisAccount}
+              isBlocking={isBlocking}
+              onUnblock={unblockThisAccount}
+              isUnblocking={isUnblocking}
+            />
+          )}
 
-      <QuickActions
-        role={role}
-        onTransfer={onTransfer}
-        onTopUp={onTopUp}
-        onMore={onSwitchAccount}
-      />
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Recent activity</CardTitle>
-        </CardHeader>
-        <CardContent className="pt-0">
-          <TransactionsList
-            accountNumber={accountNumber}
-            transactions={history.transactions}
-            isLoading={history.isLoading}
-            isForbidden={history.isForbidden}
-            error={history.error}
+          <QuickActions
+            role={role}
+            onTransfer={onTransfer}
+            onTopUp={onTopUp}
+            onMore={onSwitchAccount}
           />
-        </CardContent>
-      </Card>
+        </div>
+
+        <Card className="lg:sticky lg:top-8">
+          <CardHeader>
+            <CardTitle>Recent activity</CardTitle>
+          </CardHeader>
+          <CardContent className="pt-0">
+            <TransactionsList
+              accountNumber={accountNumber}
+              transactions={history.transactions}
+              isLoading={history.isLoading}
+              isForbidden={history.isForbidden}
+              error={history.error}
+            />
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }

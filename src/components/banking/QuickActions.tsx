@@ -41,7 +41,7 @@ export function QuickActions({ role, onTransfer, onTopUp, onMore }: QuickActions
           key={label}
           type="button"
           onClick={onClick}
-          className="flex flex-col items-center gap-2 rounded-2xl border border-border bg-card py-4 text-xs font-medium text-foreground transition-colors hover:bg-muted"
+          className="flex flex-col items-center gap-2 rounded-2xl border border-border bg-card py-4 text-xs font-medium text-foreground transition-colors hover:bg-muted lg:py-5"
         >
           <span className="flex h-11 w-11 items-center justify-center rounded-full bg-muted">
             <Icon size={18} />
