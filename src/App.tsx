@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { AccountPicker } from "@/components/banking/AccountPicker";
 import { Dashboard } from "@/components/banking/Dashboard";
@@ -15,6 +15,13 @@ function App() {
   const [accountNumber, setAccountNumber] = useState<string | null>(null);
   const [screen, setScreen] = useState<Screen>("dashboard");
   const [refreshKey, setRefreshKey] = useState(0);
+
+  useEffect(() => {
+    if (status === "unauthenticated") {
+      setAccountNumber(null);
+      setScreen("dashboard");
+    }
+  }, [status]);
 
   if (status === "booting") {
     return <AuthBootScreen />;
